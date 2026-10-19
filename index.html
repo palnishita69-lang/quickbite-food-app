@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickBite by Zesty | Luxury Dark Food Ordering</title>
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0A0C10',
+            surface: '#121824',
+            surfaceLight: '#1B2436',
+            saffron: '#FF5E00',
+            tangerine: '#FF8400',
+            gold: '#F5C042',
+            vegGreen: '#10B981',
+            nonVegRed: '#EF4444',
+            lightText: '#F8FAFC',
+            mutedText: '#94A3B8'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['Outfit', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN (Guarded) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti CDN (Guarded) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Vue 3 Production Build CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <style>
+    /* Custom Luxury Dark Scrollbars */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #0A0C10; }
+    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #FF5E00; }
+
+    /* Glassmorphism Presets */
+    .glass-nav {
+      background: rgba(10, 12, 16, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card {
+      background: rgba(18, 24, 36, 0.7);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-drawer {
+      background: rgba(14, 18, 27, 0.96);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-modal {
+      background: rgba(18, 24, 36, 0.98);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* Ambient Lighting */
+    .ambient-glow {
+      background: radial-gradient(circle at 50% 0%, rgba(255, 94, 0, 0.14) 0%, rgba(10, 12, 16, 0) 70%);
+    }
+
+    /* Scrollbar suppression */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Transitions */
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.22s ease; }
+    .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+    .slide-enter-active, .slide-leave-active { transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+    .slide-enter-from, .slide-leave-to { transform: translateX(100%); }
+
+    /* Reduced Motion Compliance */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-obsidian text-lightText font-sans min-h-screen selection:bg-saffron selection:text-white relative overflow-x-hidden">
+
+<div id="app" class="relative min-h-screen flex flex-col justify-between" v-cloak>
+
+  <!-- Ambient Glow -->
+  <div class="fixed inset-0 pointer-events-none ambient-glow z-0" aria-hidden="true"></div>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="sticky top-0 z-40 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 shrink-0 focus:outline-none focus:ring-2 focus:ring-saffron rounded-xl p-1 group" aria-label="QuickBite by Zesty Home">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-saffron to-tangerine flex items-center justify-center shadow-lg shadow-saffron/25 group-hover:scale-105 transition-transform duration-200">
+          <i data-lucide="flame" class="w-6 h-6 text-white fill-white"></i>
+        </div>
+        <div>
+          <span class="text-2xl font-extrabold tracking-tight font-display bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            {{ config.brandName }}
+          </span>
+          <span class="block text-[10px] tracking-widest uppercase font-semibold text-saffron -mt-1">
+            {{ config.coBrand }}
+          </span>
+        </div>
+      </a>
+
+      <!-- Location Selector -->
+      <button 
+        @click="openLocationModal" 
+        class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface border border-white/10 hover:border-saffron/50 transition-colors text-xs font-medium text-slate-300 focus:outline-none focus:ring-2 focus:ring-saffron"
+        aria-label="Change delivery location"
+      >
+        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-saffron"></i>
+        <span>Deliver to: <strong class="text-white font-semibold">{{ selectedLocation }}</strong></span>
+        <i data-lucide="chevron-down" class="w-3 h-3 text-mutedText"></i>
+      </button>
+
+      <!-- Search Field (Desktop & Tablet) -->
+      <div class="flex-1 max-w-md relative hidden sm:block">
+        <i data-lucide="search" class="w-4 h-4 text-mutedText absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+        <input 
+          type="text" 
+          v-model="searchQuery" 
+          placeholder="Search biryani, pizza, thali, desserts..." 
+          class="w-full bg-surface/80 border border-white/10 rounded-full pl-10 pr-9 py-2 text-sm text-lightText placeholder-mutedText focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-all"
+          aria-label="Search food items"
+        >
+        <button 
+          v-if="searchQuery" 
+          @click="searchQuery = ''" 
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-mutedText hover:text-white"
+          aria-label="Clear search input"
+        >
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Cart Button -->
+      <div class="flex items-center gap-3">
+        <button 
+          @click="openCartDrawer" 
+          class="relative flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-saffron to-tangerine hover:from-tangerine hover:to-saffron text-white font-medium text-sm shadow-lg shadow-saffron/20 hover:shadow-saffron/40 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white"
+          aria-label="View shopping cart"
+        >
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          <span class="hidden sm:inline font-semibold">Cart</span>
+          <span class="bg-black/35 backdrop-blur-sm text-white text-xs px-2 py-0.5 rounded-full font-bold">
+            {{ totalCartItems }}
+          </span>
+          <span v-if="cartSubtotalPaise > 0" class="hidden sm:inline border-l border-white/20 pl-2 text-xs font-semibold">
+            {{ formatPaise(cartSubtotalPaise) }}
+          </span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Search Field -->
+    <div class="sm:hidden px-4 pb-3">
+      <div class="relative w-full">
+        <i data-lucide="search" class="w-4 h-4 text-mutedText absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+        <input 
+          type="text" 
+          v-model="searchQuery" 
+          placeholder="Search dishes..." 
+          class="w-full bg-surface border border-white/10 rounded-full pl-10 pr-8 py-2 text-xs text-lightText focus:outline-none focus:border-saffron"
+          aria-label="Search dishes mobile"
+        >
+        <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-mutedText" aria-label="Clear mobile search">
+          <i data-lucide="x" class="w-3 h-3"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-6 space-y-10 z-10">
+
+    <!-- HERO PROMOTIONAL CAROUSEL -->
+    <section 
+      class="relative rounded-3xl overflow-hidden border border-white/10 bg-surface h-[360px] sm:h-[420px] md:h-[460px] shadow-2xl transition-all"
+      @mouseenter="onCarouselMouseEnter"
+      @mouseleave="onCarouselMouseLeave"
+      @focusin="onCarouselMouseEnter"
+      @focusout="onCarouselMouseLeave"
+      aria-label="Featured Offers"
+    >
+      <div 
+        v-for="(slide, index) in heroSlides" 
+        :key="slide.id"
+        class="absolute inset-0 transition-opacity duration-700 ease-in-out flex flex-col justify-center"
+        :class="currentSlideIndex === index ? 'opacity-100 pointer-events-auto z-10' : 'opacity-0 pointer-events-none z-0'"
+      >
+        <img 
+          :src="slide.image" 
+          :alt="slide.title"
+          class="absolute inset-0 w-full h-full object-cover object-center transform scale-105 transition-transform duration-1000"
+          @error="handleImageError"
+        >
+        <div class="absolute inset-0 bg-gradient-to-r from-obsidian via-obsidian/85 to-transparent sm:w-2/3 z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent z-10"></div>
+
+        <div class="relative z-20 px-6 sm:px-12 md:px-16 max-w-2xl space-y-4">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-saffron/20 border border-saffron/30 text-saffron text-xs font-bold uppercase tracking-wider">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            {{ slide.eyebrow }}
+          </div>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold font-display leading-tight tracking-tight text-white">
+            {{ slide.title }}
+          </h1>
+          <p class="text-sm sm:text-base text-slate-300 max-w-lg leading-relaxed">
+            {{ slide.description }}
+          </p>
+          <div class="pt-2 flex items-center gap-4">
+            <a 
+              href="#menu-section" 
+              class="px-6 py-3 rounded-full bg-gradient-to-r from-saffron to-tangerine hover:from-tangerine hover:to-saffron text-white text-sm font-semibold shadow-lg shadow-saffron/30 hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-white"
+            >
+              Order Now
+            </a>
+            <button 
+              @click="applyPromoDirectly(config.defaultPromo.code)" 
+              class="px-5 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-gold"
+            >
+              Use: <span class="font-bold text-gold">{{ config.defaultPromo.code }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination Indicators -->
+      <div class="absolute bottom-6 left-6 sm:left-12 z-20 flex items-center gap-2.5">
+        <button 
+          v-for="(slide, index) in heroSlides" 
+          :key="'dot-' + slide.id" 
+          @click="setHeroSlide(index)"
+          class="h-2 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-saffron"
+          :class="currentSlideIndex === index ? 'w-8 bg-saffron' : 'w-2 bg-white/30 hover:bg-white/60'"
+          :aria-label="'Go to slide ' + (index + 1)"
+        ></button>
+      </div>
+    </section>
+
+    <!-- CATEGORY FILTER PILLS -->
+    <section id="menu-section" class="space-y-4 pt-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold font-display text-white tracking-tight">Curated Menu</h2>
+          <p class="text-xs sm:text-sm text-mutedText">Artisanal delicacies crafted with passion and pure ingredients</p>
+        </div>
+        <span class="text-xs font-semibold text-slate-400 bg-surface px-3 py-1 rounded-full border border-white/10">
+          Showing: {{ filteredMenu.length }} Dishes
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2.5 overflow-x-auto pb-2 no-scrollbar scroll-smooth" role="tablist">
+        <button 
+          v-for="category in config.categories" 
+          :key="category"
+          @click="selectedCategory = category"
+          role="tab"
+          :aria-selected="selectedCategory === category"
+          class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 border focus:outline-none focus:ring-2 focus:ring-saffron"
+          :class="selectedCategory === category 
+            ? 'bg-gradient-to-r from-saffron to-tangerine text-white border-transparent shadow-lg shadow-saffron/25 scale-105' 
+            : 'bg-surface text-slate-300 border-white/5 hover:border-white/20 hover:text-white'"
+        >
+          {{ category }}
+        </button>
+      </div>
+    </section>
+
+    <!-- MENU CATALOG GRID -->
+    <section>
+      <div v-if="filteredMenu.length === 0" class="glass-card rounded-2xl p-12 text-center space-y-4 max-w-md mx-auto my-8 border border-white/10">
+        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-mutedText">
+          <i data-lucide="utensils-crossed" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-bold text-white">No culinary matches found</h3>
+        <p class="text-xs text-mutedText">We could not find anything matching "{{ searchQuery }}". Try checking for spelling or resetting filters.</p>
+        <button 
+          @click="resetFilters" 
+          class="px-4 py-2 rounded-full bg-saffron text-white text-xs font-semibold hover:bg-tangerine transition-all focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          Clear All Filters
+        </button>
+      </div>
+
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+        <article 
+          v-for="dish in filteredMenu" 
+          :key="dish.id" 
+          class="glass-card rounded-2xl overflow-hidden border border-white/10 hover:border-saffron/40 hover:shadow-2xl hover:shadow-saffron/10 transition-all duration-300 group flex flex-col justify-between"
+        >
+          <!-- Dish Image & Micro Badges -->
+          <div class="relative h-52 overflow-hidden bg-surfaceLight">
+            <img 
+              :src="dish.image" 
+              :alt="dish.name"
+              loading="lazy"
+              @error="handleImageError"
+              class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            >
+            <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-85"></div>
+            
+            <!-- Veg/Non-Veg Badge -->
+            <div class="absolute top-3 left-3 bg-surface/90 backdrop-blur-md p-1.5 rounded-lg border border-white/10 flex items-center gap-1.5 shadow-md">
+              <span 
+                class="w-3.5 h-3.5 border-2 flex items-center justify-center rounded-sm"
+                :class="dish.isVeg ? 'border-vegGreen' : 'border-nonVegRed'"
+              >
+                <span 
+                  class="w-1.5 h-1.5 rounded-full" 
+                  :class="dish.isVeg ? 'bg-vegGreen' : 'bg-nonVegRed'"
+                ></span>
+              </span>
+              <span class="text-[10px] font-bold uppercase tracking-wider" :class="dish.isVeg ? 'text-vegGreen' : 'text-nonVegRed'">
+                {{ dish.isVeg ? 'VEG' : 'NON-VEG' }}
+              </span>
+            </div>
+
+            <!-- Prep Time Badge -->
+            <div class="absolute top-3 right-3 bg-surface/90 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 text-[11px] font-semibold text-slate-300 flex items-center gap-1">
+              <i data-lucide="clock" class="w-3 h-3 text-saffron"></i>
+              {{ dish.prepTime }}
+            </div>
+
+            <!-- Category Pill -->
+            <div class="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-semibold text-slate-300 border border-white/10">
+              {{ dish.category }}
+            </div>
+          </div>
+
+          <!-- Dish Information -->
+          <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="font-bold text-lg text-white group-hover:text-saffron transition-colors leading-snug">
+                  {{ dish.name }}
+                </h3>
+                <div class="flex items-center gap-1 bg-gold/10 border border-gold/20 px-2 py-0.5 rounded text-gold text-xs font-bold shrink-0">
+                  <i data-lucide="star" class="w-3 h-3 fill-gold text-gold"></i>
+                  <span>{{ dish.rating.toFixed(1) }}</span>
+                </div>
+              </div>
+              <p class="text-xs text-mutedText mt-2 line-clamp-2 leading-relaxed">
+                {{ dish.description }}
+              </p>
+            </div>
+
+            <!-- Pricing and Action Controls -->
+            <div class="pt-3 border-t border-white/5 flex items-center justify-between">
+              <div>
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-lg font-extrabold text-white font-display">{{ formatPaise(dish.price * 100) }}</span>
+                  <span class="text-xs text-mutedText line-through">{{ formatPaise(dish.originalPrice * 100) }}</span>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-400">
+                  {{ Math.round(((dish.originalPrice - dish.price) / dish.originalPrice) * 100) }}% OFF
+                </span>
+              </div>
+
+              <div>
+                <button 
+                  v-if="!getCartQuantity(dish.id)" 
+                  @click="addToCart(dish)" 
+                  class="px-5 py-2 rounded-full bg-white/10 hover:bg-saffron text-white text-xs font-bold border border-white/20 hover:border-saffron transition-all duration-200 active:scale-95 shadow-sm focus:outline-none focus:ring-2 focus:ring-saffron"
+                  :aria-label="'Add ' + dish.name + ' to cart'"
+                >
+                  + ADD
+                </button>
+                <div 
+                  v-else 
+                  class="flex items-center gap-2 bg-saffron rounded-full px-2 py-1 text-white shadow-lg shadow-saffron/20"
+                >
+                  <button 
+                    @click="updateCartQuantity(dish.id, -1)" 
+                    class="w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center font-bold text-sm transition-colors focus:outline-none"
+                    :aria-label="'Decrease ' + dish.name + ' quantity'"
+                  >
+                    -
+                  </button>
+                  <span class="text-xs font-extrabold px-1 min-w-[16px] text-center">{{ getCartQuantity(dish.id) }}</span>
+                  <button 
+                    @click="updateCartQuantity(dish.id, 1)" 
+                    class="w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center font-bold text-sm transition-colors focus:outline-none"
+                    :aria-label="'Increase ' + dish.name + ' quantity'"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== SLIDE-OVER CART DRAWER ==================== -->
+  <transition name="fade">
+    <div 
+      v-if="isCartOpen" 
+      @click="closeCartDrawer" 
+      class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 transition-opacity"
+      aria-hidden="true"
+    ></div>
+  </transition>
+
+  <transition name="slide">
+    <aside 
+      v-if="isCartOpen" 
+      class="fixed right-0 top-0 bottom-0 w-full max-w-md glass-drawer z-50 flex flex-col justify-between shadow-2xl overflow-hidden"
+      role="dialog"
+      aria-label="Shopping Cart Drawer"
+    >
+      <div class="p-6 border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-saffron/20 flex items-center justify-center text-saffron">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          </div>
+          <h2 class="text-lg font-bold font-display text-white">Your Feast Bag</h2>
+          <span class="text-xs bg-white/10 px-2 py-0.5 rounded-full text-slate-300 font-semibold">
+            {{ totalCartItems }}
+          </span>
+        </div>
+        <button 
+          @click="closeCartDrawer" 
+          class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-slate-300 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-saffron"
+          aria-label="Close Cart"
+        >
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Cart Item List -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-4">
+        <div v-if="cart.length === 0" class="h-full flex flex-col items-center justify-center text-center space-y-4 py-16">
+          <div class="w-20 h-20 rounded-full bg-surfaceLight flex items-center justify-center text-mutedText">
+            <i data-lucide="shopping-cart" class="w-10 h-10"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Your cart is empty</h3>
+            <p class="text-xs text-mutedText max-w-xs mt-1">Explore our signature Biryanis, hot pizzas, and refreshments to start your feast.</p>
+          </div>
+          <button 
+            @click="closeCartDrawer" 
+            class="px-6 py-2.5 rounded-full bg-saffron hover:bg-tangerine text-white text-xs font-bold transition-all shadow-lg shadow-saffron/20"
+          >
+            Explore Menu
+          </button>
+        </div>
+
+        <div v-else class="space-y-3">
+          <div 
+            v-for="item in cart" 
+            :key="'cart-' + item.id" 
+            class="glass-card p-3 rounded-xl border border-white/5 flex items-center justify-between gap-3"
+          >
+            <img 
+              :src="item.image" 
+              :alt="item.name" 
+              class="w-14 h-14 rounded-lg object-cover bg-surface shrink-0"
+              @error="handleImageError"
+            >
+            <div class="flex-1 min-w-0">
+              <h4 class="text-xs font-bold text-white truncate">{{ item.name }}</h4>
+              <p class="text-[11px] text-mutedText mt-0.5">{{ formatPaise(item.price * 100) }} each</p>
+              <p class="text-xs font-semibold text-saffron mt-1">{{ formatPaise(item.price * item.quantity * 100) }}</p>
+            </div>
+            
+            <div class="flex items-center gap-1.5 bg-surfaceLight rounded-full p-1 border border-white/5">
+              <button 
+                @click="updateCartQuantity(item.id, -1)" 
+                class="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs font-bold transition-colors"
+                :aria-label="'Decrease ' + item.name + ' in cart'"
+              >
+                -
+              </button>
+              <span class="text-xs font-bold px-1 min-w-[14px] text-center">{{ item.quantity }}</span>
+              <button 
+                @click="updateCartQuantity(item.id, 1)" 
+                class="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs font-bold transition-colors"
+                :aria-label="'Increase ' + item.name + ' in cart'"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voucher Box -->
+        <div v-if="cart.length > 0" class="pt-2">
+          <div class="glass-card p-3 rounded-xl border border-white/10 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="tag" class="w-3.5 h-3.5 text-gold"></i>
+                Apply Voucher
+              </span>
+              <span v-if="isCouponApplied" class="text-[10px] text-emerald-400 font-bold">APPLIED</span>
+            </div>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                v-model="couponInput" 
+                placeholder="Enter voucher" 
+                class="flex-1 bg-surface border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white uppercase focus:outline-none focus:border-saffron"
+                :disabled="isCouponApplied"
+              >
+              <button 
+                v-if="!isCouponApplied" 
+                @click="applyCoupon" 
+                class="px-3 py-1.5 rounded-lg bg-gold/20 hover:bg-gold/30 text-gold border border-gold/40 text-xs font-bold transition-colors"
+              >
+                Apply
+              </button>
+              <button 
+                v-else 
+                @click="removeCoupon" 
+                class="px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/40 text-xs font-bold transition-colors"
+              >
+                Remove
+              </button>
+            </div>
+            <p v-if="isCouponApplied" class="text-[10px] text-emerald-400">
+              ⚡ '{{ appliedCouponCode }}' applied! You saved {{ formatPaise(discountPaise) }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billing Breakdown -->
+      <div v-if="cart.length > 0" class="p-6 border-t border-white/10 bg-surface space-y-3">
+        <div class="space-y-1.5 text-xs text-slate-300">
+          <div class="flex justify-between">
+            <span>Item Total</span>
+            <span class="text-white font-medium">{{ formatPaise(cartSubtotalPaise) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Delivery Fee</span>
+            <span class="text-white font-medium">{{ formatPaise(deliveryFeePaise) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Taxes (5%)</span>
+            <span class="text-white font-medium">{{ formatPaise(taxesPaise) }}</span>
+          </div>
+          <div v-if="discountPaise > 0" class="flex justify-between text-emerald-400 font-semibold">
+            <span>Discount Saved</span>
+            <span>-{{ formatPaise(discountPaise) }}</span>
+          </div>
+          <div class="border-t border-white/10 pt-2 flex justify-between text-base font-bold text-white">
+            <span>Grand Total</span>
+            <span class="text-saffron font-display text-lg">{{ formatPaise(grandTotalPaise) }}</span>
+          </div>
+        </div>
+
+        <button 
+          @click="openCheckoutModal" 
+          class="w-full py-3.5 rounded-full bg-gradient-to-r from-saffron to-tangerine hover:from-tangerine hover:to-saffron text-white text-sm font-bold shadow-lg shadow-saffron/25 active:scale-95 transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          <span>Proceed to Checkout</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </aside>
+  </transition>
+
+  <!-- ==================== CHECKOUT MODAL ==================== -->
+  <transition name="fade">
+    <div 
+      v-if="showCheckoutModal" 
+      class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-label="Checkout Modal"
+    >
+      <div 
+        @click.stop 
+        class="glass-modal w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-6 relative border border-white/15 my-8 shadow-2xl"
+      >
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div>
+            <h3 class="text-xl font-bold font-display text-white">Complete Your Order</h3>
+            <p class="text-xs text-mutedText">Verify delivery destination and payment choice</p>
+          </div>
+          <button 
+            @click="closeCheckoutModal" 
+            :disabled="isSubmittingOrder"
+            class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-slate-300 disabled:opacity-50"
+            aria-label="Close Checkout"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <form @submit.prevent="submitOrder" class="space-y-4">
+          <div class="space-y-1">
+            <label class="block text-xs font-semibold text-slate-300">Customer Full Name *</label>
+            <input 
+              type="text" 
+              v-model="checkoutForm.name" 
+              placeholder="e.g. Sourav Ganguly" 
+              class="w-full bg-surface border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-colors"
+              :class="formErrors.name ? 'border-red-500' : 'border-white/10 focus:border-saffron'"
+            >
+            <span v-if="formErrors.name" class="text-[10px] text-red-400">{{ formErrors.name }}</span>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-semibold text-slate-300">10-Digit Mobile Number *</label>
+            <input 
+              type="tel" 
+              v-model="checkoutForm.phone" 
+              placeholder="e.g. 9830012345" 
+              class="w-full bg-surface border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-colors"
+              :class="formErrors.phone ? 'border-red-500' : 'border-white/10 focus:border-saffron'"
+            >
+            <span v-if="formErrors.phone" class="text-[10px] text-red-400">{{ formErrors.phone }}</span>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-semibold text-slate-300">Complete Delivery Address *</label>
+            <textarea 
+              v-model="checkoutForm.address" 
+              rows="2" 
+              placeholder="Flat/House No, Street, Landmark, Area..." 
+              class="w-full bg-surface border rounded-xl px-4 py-2 text-sm text-white focus:outline-none transition-colors resize-none"
+              :class="formErrors.address ? 'border-red-500' : 'border-white/10 focus:border-saffron'"
+            ></textarea>
+            <span v-if="formErrors.address" class="text-[10px] text-red-400">{{ formErrors.address }}</span>
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <label class="block text-xs font-semibold text-slate-300">Payment Option</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label 
+                class="flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all"
+                :class="checkoutForm.paymentMethod === 'UPI' ? 'border-saffron bg-saffron/10 text-white' : 'border-white/10 bg-surface text-slate-300'"
+              >
+                <input type="radio" value="UPI" v-model="checkoutForm.paymentMethod" class="hidden">
+                <i data-lucide="smartphone" class="w-4 h-4 text-saffron"></i>
+                <span class="text-xs font-bold">UPI / QR Code</span>
+              </label>
+
+              <label 
+                class="flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all"
+                :class="checkoutForm.paymentMethod === 'COD' ? 'border-saffron bg-saffron/10 text-white' : 'border-white/10 bg-surface text-slate-300'"
+              >
+                <input type="radio" value="COD" v-model="checkoutForm.paymentMethod" class="hidden">
+                <i data-lucide="banknote" class="w-4 h-4 text-emerald-400"></i>
+                <span class="text-xs font-bold">Cash on Delivery</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="bg-surface p-3 rounded-xl border border-white/5 flex items-center justify-between text-xs">
+            <span class="text-mutedText">Payable Grand Total:</span>
+            <span class="text-base font-extrabold text-saffron">{{ formatPaise(grandTotalPaise) }}</span>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button 
+              type="button" 
+              @click="closeCheckoutModal" 
+              :disabled="isSubmittingOrder"
+              class="flex-1 py-3 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition-colors disabled:opacity-50"
+            >
+              Back to Cart
+            </button>
+            <button 
+              type="submit" 
+              :disabled="isSubmittingOrder"
+              class="flex-1 py-3 rounded-full bg-gradient-to-r from-saffron to-tangerine hover:from-tangerine hover:to-saffron text-white text-xs font-bold transition-all shadow-lg shadow-saffron/30 flex items-center justify-center gap-2 disabled:opacity-75 focus:outline-none focus:ring-2 focus:ring-white"
+            >
+              <i v-if="isSubmittingOrder" data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+              <span>{{ isSubmittingOrder ? 'Placing Order...' : 'Confirm Order' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </transition>
+
+  <!-- ==================== ORDER TRACKER MODAL ==================== -->
+  <transition name="fade">
+    <div 
+      v-if="showTrackingModal" 
+      class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-label="Order Tracking Simulation"
+    >
+      <div class="glass-modal w-full max-w-lg rounded-3xl p-6 sm:p-8 space-y-6 relative border border-white/15 my-8 shadow-2xl">
+        
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span class="text-[11px] font-bold text-emerald-400 tracking-wider uppercase">Live Simulation Tracker</span>
+            </div>
+            <h3 class="text-xl font-bold font-display text-white mt-1">Order #{{ activeOrder.id }}</h3>
+          </div>
+          <button 
+            @click="closeTrackingModal" 
+            class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-slate-300"
+            aria-label="Close tracking"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- 4-Stage Progress Stepper -->
+        <div class="py-4 space-y-6">
+          <div class="relative flex items-center justify-between">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-surfaceLight w-full z-0"></div>
+            <div 
+              class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-saffron to-tangerine transition-all duration-700 z-0"
+              :style="{ width: ((trackingStage - 1) / 3) * 100 + '%' }"
+            ></div>
+
+            <div 
+              v-for="step in trackerStages" 
+              :key="step.stage"
+              class="relative z-10 flex flex-col items-center gap-2"
+            >
+              <div 
+                class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
+                :class="trackingStage >= step.stage 
+                  ? 'bg-gradient-to-tr from-saffron to-tangerine text-white shadow-lg shadow-saffron/40 scale-110' 
+                  : 'bg-surfaceLight text-slate-500 border border-white/10'"
+              >
+                <i :data-lucide="step.icon" class="w-4 h-4"></i>
+              </div>
+              <span 
+                class="text-[10px] font-semibold tracking-tight text-center max-w-[64px]"
+                :class="trackingStage >= step.stage ? 'text-white' : 'text-slate-500'"
+              >
+                {{ step.label }}
+              </span>
+            </div>
+          </div>
+
+          <div class="bg-surface/90 border border-white/10 rounded-2xl p-4 text-center space-y-1">
+            <h4 class="text-sm font-bold text-white font-display">{{ currentStageInfo.statusTitle }}</h4>
+            <p class="text-xs text-mutedText">{{ currentStageInfo.statusSubtitle }}</p>
+            <p class="text-[11px] font-semibold text-gold pt-1">Estimated Arrival: ~20-25 Mins</p>
+          </div>
+        </div>
+
+        <div class="bg-surfaceLight/50 rounded-2xl p-4 border border-white/5 space-y-3 text-xs">
+          <div class="flex justify-between text-slate-400">
+            <span>Customer: <strong class="text-white">{{ activeOrder.customer.name }}</strong></span>
+            <span>Paid: <strong class="text-saffron">{{ formatPaise(activeOrder.grandTotalPaise) }}</strong> ({{ activeOrder.paymentMethod }})</span>
+          </div>
+          <div class="text-slate-400 truncate">
+            Delivery: <span class="text-white">{{ activeOrder.customer.address }}</span>
+          </div>
+          <div class="border-t border-white/5 pt-2 text-slate-400">
+            <span>Items: </span>
+            <span class="text-slate-300 font-medium">
+              {{ activeOrder.items.map(i => i.name + ' × ' + i.quantity).join(', ') }}
+            </span>
+          </div>
+        </div>
+
+        <button 
+          @click="closeTrackingModal" 
+          class="w-full py-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all"
+        >
+          Keep Browsing Feasts
+        </button>
+
+      </div>
+    </div>
+  </transition>
+
+  <!-- ==================== LOCATION SELECTION MODAL ==================== -->
+  <transition name="fade">
+    <div 
+      v-if="showLocationModal" 
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-label="Location Selector"
+    >
+      <div class="glass-modal w-full max-w-xs rounded-2xl p-6 space-y-4 border border-white/15">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4 text-saffron"></i>
+          Select Delivery Hub
+        </h3>
+        <div class="space-y-2">
+          <button 
+            v-for="loc in sampleLocations" 
+            :key="loc" 
+            @click="selectLocation(loc)"
+            class="w-full text-left px-4 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center justify-between"
+            :class="selectedLocation === loc ? 'bg-saffron text-white font-bold' : 'bg-surface text-slate-300 hover:bg-white/5'"
+          >
+            <span>{{ loc }}</span>
+            <i v-if="selectedLocation === loc" data-lucide="check" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+  <div class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none" aria-live="polite">
+    <transition-group name="fade">
+      <div 
+        v-for="toast in toasts" 
+        :key="toast.id" 
+        class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl bg-surface/95 border border-white/15 text-white text-xs shadow-2xl backdrop-blur-md max-w-sm"
+      >
+        <i 
+          :data-lucide="toast.icon || 'info'" 
+          class="w-4 h-4 shrink-0" 
+          :class="toast.type === 'error' ? 'text-red-400' : 'text-saffron'"
+        ></i>
+        <span class="flex-1 font-medium">{{ toast.message }}</span>
+        <button @click="dismissToast(toast.id)" class="text-mutedText hover:text-white" aria-label="Dismiss message">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </transition-group>
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t border-white/10 bg-surface/80 mt-16 py-10 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mutedText">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-saffron flex items-center justify-center text-white">
+          <i data-lucide="flame" class="w-3.5 h-3.5 fill-white"></i>
+        </div>
+        <span class="text-white font-semibold">{{ config.brandName }}</span>
+        <span>{{ config.coBrand }} © 2026. Handcrafted for food connoisseurs.</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="#menu-section" class="hover:text-white transition-colors">Feast Menu</a>
+        <button @click="openCartDrawer" class="hover:text-white transition-colors">Bag</button>
+        <button @click="openLocationModal" class="hover:text-white transition-colors">{{ selectedLocation }} Hub</button>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ==================== APPLICATION SCRIPT ==================== -->
+<script>
+// 1. BRAND CONFIGURATION — MANDATORY FIRST STATEMENT
+const STORE_CONFIG = {
+  brandName: "QuickBite",
+  coBrand: "by Zesty",
+  currency: "₹",
+  deliveryFee: 40,
+  taxRate: 0.05,
+  defaultPromo: {
+    code: "QUICK60",
+    discountPercent: 60,
+    maxDiscount: 120
+  },
+  categories: [
+    "All Feasts",
+    "Royal Biryani",
+    "Crispy Chinese",
+    "Sizzling Pizza",
+    "North Indian Thali",
+    "Desserts",
+    "Mocktails"
+  ],
+  menu: [
+    {
+      id: "qb-101",
+      name: "Awadhi Dum Mutton Biryani",
+      category: "Royal Biryani",
+      price: 449,
+      originalPrice: 599,
+      rating: 4.9,
+      prepTime: "30 mins",
+      isVeg: false,
+      image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80",
+      description: "Slow-cooked tender mutton layered with fragrant basmati, saffron, kewra water, and authentic shahi spices."
+    },
+    {
+      id: "qb-102",
+      name: "Hyderabadi Paneer Dum Biryani",
+      category: "Royal Biryani",
+      price: 349,
+      originalPrice: 449,
+      rating: 4.8,
+      prepTime: "25 mins",
+      isVeg: true,
+      image: "https://images.unsplash.com/photo-1642821373181-696a54913e9a?auto=format&fit=crop&w=800&q=80",
+      description: "Charcoal-smoked cottage cheese cubes tossed in minty biryani gravy and sealed in traditional clay handi."
+    },
+    {
+      id: "qb-103",
+      name: "Dragon Schezwan Chilli Chicken",
+      category: "Crispy Chinese",
+      price: 329,
+      originalPrice: 429,
+      rating: 4.7,
+      prepTime: "20 mins",
+      isVeg: false,
+      image: "https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=800&q=80",
+      description: "Wok-tossed battered chicken bites glazed with spicy Schezwan peppers, scallions, and toasted sesame."
+    },
+    {
+      id: "qb-104",
+      name: "Crispy Honey Chilli Lotus Stem",
+      category: "Crispy Chinese",
+      price: 279,
+      originalPrice: 359,
+      rating: 4.6,
+      prepTime: "18 mins",
+      isVeg: true,
+      image: "https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&w=800&q=80",
+      description: "Golden fried crunchy lotus root chips tossed in sweet honey chili drizzle with fresh bell peppers."
+    },
+    {
+      id: "qb-105",
+      name: "Smoked Truffle Burrata Pizza",
+      category: "Sizzling Pizza",
+      price: 499,
+      originalPrice: 649,
+      rating: 4.9,
+      prepTime: "22 mins",
+      isVeg: true,
+      image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80",
+      description: "Hand-stretched sourdough topped with San Marzano tomatoes, fresh burrata cheese, and black truffle oil."
+    },
+    {
+      id: "qb-106",
+      name: "Royal Maharaja Special Thali",
+      category: "North Indian Thali",
+      price: 399,
+      originalPrice: 529,
+      rating: 4.8,
+      prepTime: "25 mins",
+      isVeg: true,
+      image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80",
+      description: "Complete feast with Dal Makhani, Shahi Paneer, Jeera Rice, 2 Butter Naan, Gulab Jamun, and Fresh Raita."
+    },
+    {
+      id: "qb-107",
+      name: "Butter Chicken with Garlic Kulcha",
+      category: "North Indian Thali",
+      price: 429,
+      originalPrice: 549,
+      rating: 4.9,
+      prepTime: "25 mins",
+      isVeg: false,
+      image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=800&q=80",
+      description: "Tandoor-grilled chicken simmered in rich satin makhani gravy served with soft flaky garlic kulcha."
+    },
+    {
+      id: "qb-108",
+      name: "Belgian Molten Lava Sundae",
+      category: "Desserts",
+      price: 249,
+      originalPrice: 319,
+      rating: 4.7,
+      prepTime: "12 mins",
+      isVeg: true,
+      image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=800&q=80",
+      description: "Warm chocolate lava cake bursting with melted dark ganache paired with gourmet Madagascar vanilla ice cream."
+    },
+    {
+      id: "qb-109",
+      name: "Kaffir Lime & Passionfruit Cooler",
+      category: "Mocktails",
+      price: 189,
+      originalPrice: 249,
+      rating: 4.6,
+      prepTime: "8 mins",
+      isVeg: true,
+      image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80",
+      description: "Sparkling botanical refresher infused with hand-crushed kaffir lime leaves, passionfruit pulp, and fizz."
+    }
+  ]
+};
+
+// 2. VUE 3 APPLICATION LOGIC
+const { createApp } = Vue;
+
+const app = createApp({
+  data() {
+    return {
+      config: STORE_CONFIG,
+      selectedCategory: "All Feasts",
+      searchQuery: "",
+      cart: [],
+      isCartOpen: false,
+      showCheckoutModal: false,
+      showTrackingModal: false,
+      showLocationModal: false,
+      selectedLocation: "Kolkata Central Hub",
+      sampleLocations: ["Kolkata Central Hub", "Salt Lake Sector V", "Ballygunge South", "New Town Action Area I"],
+      
+      couponInput: STORE_CONFIG.defaultPromo.code,
+      appliedCouponCode: STORE_CONFIG.defaultPromo.code,
+      isCouponApplied: true,
+
+      currentSlideIndex: 0,
+      carouselTimer: null,
+      pauseCarousel: false,
+      heroSlides: [
+        {
+          id: 1,
+          eyebrow: "Grand Opening Offer",
+          title: "Flat 60% Off Your Artisanal Feasts",
+          description: "Indulge in royal Awadhi biryanis, gourmet pizzas, and desserts with coupon code QUICK60.",
+          image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1400&q=80"
+        },
+        {
+          id: 2,
+          eyebrow: "Master Chef Special",
+          title: "Slow Dum-Cooked Handi Biryani",
+          description: "Infused with Kashmiri saffron, hand-ground garam masala, and tender meat sealed in earthenware.",
+          image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=1400&q=80"
+        },
+        {
+          id: 3,
+          eyebrow: "Midnight Cravings",
+          title: "Fresh Wood-Fired Sourdough Pizzas",
+          description: "Baking hot till 3:00 AM. Crafted with Italian San Marzano tomatoes and authentic buffalo burrata.",
+          image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1400&q=80"
+        }
+      ],
+
+      checkoutForm: {
+        name: "",
+        phone: "",
+        address: "",
+        paymentMethod: "UPI"
+      },
+      formErrors: {},
+      isSubmittingOrder: false,
+
+      trackingStage: 1,
+      trackingTimer: null,
+      trackerStages: [
+        { stage: 1, label: "Order Placed", icon: "check-circle-2" },
+        { stage: 2, label: "Kitchen Preparing", icon: "flame" },
+        { stage: 3, label: "On The Way", icon: "bike" },
+        { stage: 4, label: "Delivered", icon: "heart-handshake" }
+      ],
+      activeOrder: {
+        id: "",
+        customer: {},
+        items: [],
+        grandTotalPaise: 0,
+        paymentMethod: "UPI"
+      },
+
+      toasts: [],
+      visibilityListener: null
+    };
+  },
+
+  computed: {
+    filteredMenu() {
+      const q = this.searchQuery.trim().toLowerCase();
+      return this.config.menu.filter(dish => {
+        const matchesCategory = this.selectedCategory === "All Feasts" || dish.category === this.selectedCategory;
+        const matchesSearch = !q || 
+          dish.name.toLowerCase().includes(q) || 
+          dish.description.toLowerCase().includes(q) ||
+          dish.category.toLowerCase().includes(q);
+        return matchesCategory && matchesSearch;
+      });
+    },
+
+    totalCartItems() {
+      return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+    },
+
+    // Strict Integer Paise Calculations (1 Rupee = 100 Paise)
+    cartSubtotalPaise() {
+      return this.cart.reduce((sum, item) => sum + ((item.price * 100) * item.quantity), 0);
+    },
+
+    deliveryFeePaise() {
+      return this.cart.length > 0 ? (this.config.deliveryFee * 100) : 0;
+    },
+
+    discountPaise() {
+      if (!this.isCouponApplied || this.cartSubtotalPaise === 0) return 0;
+      const rawDiscountPaise = Math.round((this.cartSubtotalPaise * this.config.defaultPromo.discountPercent) / 100);
+      const maxDiscountPaise = this.config.defaultPromo.maxDiscount * 100;
+      return Math.min(rawDiscountPaise, maxDiscountPaise);
+    },
+
+    taxableSubtotalPaise() {
+      return Math.max(0, this.cartSubtotalPaise - this.discountPaise);
+    },
+
+    taxesPaise() {
+      return this.cart.length > 0 ? Math.round(this.taxableSubtotalPaise * this.config.taxRate) : 0;
+    },
+
+    grandTotalPaise() {
+      if (this.cart.length === 0) return 0;
+      return this.taxableSubtotalPaise + this.taxesPaise + this.deliveryFeePaise;
+    },
+
+    currentStageInfo() {
+      switch(this.trackingStage) {
+        case 1:
+          return { statusTitle: "Order Confirmed & Sent to Kitchen", statusSubtitle: "Chef is reviewing your special requests" };
+        case 2:
+          return { statusTitle: "Preparing Your Artisanal Dishes", statusSubtitle: "Simmering on gentle dum flame with premium ingredients" };
+        case 3:
+          return { statusTitle: "Delivery Partner On The Route", statusSubtitle: "Hot insulated pack traveling swiftly to your address" };
+        case 4:
+          return { statusTitle: "Order Safely Delivered", statusSubtitle: "Serve hot and enjoy your royal feast! Bon Appétit!" };
+        default:
+          return { statusTitle: "Processing Order", statusSubtitle: "Stand by..." };
+      }
+    }
+  },
+
+  methods: {
+    formatPaise(paise) {
+      const rupees = (paise || 0) / 100;
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(rupees);
+    },
+
+    getCartQuantity(dishId) {
+      const found = this.cart.find(i => i.id === dishId);
+      return found ? found.quantity : 0;
+    },
+
+    addToCart(dish) {
+      this.cart.push({ ...dish, quantity: 1 });
+      this.showToast(`Added "${dish.name}" to cart`, "shopping-bag");
+      this.refreshIcons();
+    },
+
+    updateCartQuantity(dishId, change) {
+      const idx = this.cart.findIndex(i => i.id === dishId);
+      if (idx !== -1) {
+        const newQty = this.cart[idx].quantity + change;
+        if (newQty <= 0) {
+          const removedName = this.cart[idx].name;
+          this.cart.splice(idx, 1);
+          this.showToast(`Removed "${removedName}" from cart`, "trash-2");
+        } else {
+          this.cart[idx].quantity = newQty;
+        }
+      }
+      this.refreshIcons();
+    },
+
+    applyCoupon() {
+      const code = this.couponInput.trim().toUpperCase();
+      if (code === this.config.defaultPromo.code) {
+        this.isCouponApplied = true;
+        this.appliedCouponCode = code;
+        this.showToast(`Voucher ${code} applied! Saved up to ₹${this.config.defaultPromo.maxDiscount}`, "tag");
+      } else {
+        this.showToast("Invalid promo code. Please use QUICK60", "alert-circle", "error");
+      }
+    },
+
+    applyPromoDirectly(code) {
+      this.couponInput = code;
+      this.applyCoupon();
+      const el = document.getElementById("menu-section");
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    },
+
+    removeCoupon() {
+      this.isCouponApplied = false;
+      this.appliedCouponCode = "";
+      this.couponInput = "";
+      this.showToast("Coupon removed", "info");
+    },
+
+    resetFilters() {
+      this.searchQuery = "";
+      this.selectedCategory = "All Feasts";
+    },
+
+    openCartDrawer() {
+      this.isCartOpen = true;
+      this.lockScroll(true);
+      this.refreshIcons();
+    },
+
+    closeCartDrawer() {
+      this.isCartOpen = false;
+      this.checkAndUnlockScroll();
+    },
+
+    openLocationModal() {
+      this.showLocationModal = true;
+      this.lockScroll(true);
+      this.refreshIcons();
+    },
+
+    selectLocation(loc) {
+      this.selectedLocation = loc;
+      this.showLocationModal = false;
+      this.checkAndUnlockScroll();
+      this.showToast(`Delivery hub set to ${loc}`, "map-pin");
+    },
+
+    openCheckoutModal() {
+      this.isCartOpen = false;
+      this.formErrors = {};
+      this.showCheckoutModal = true;
+      this.lockScroll(true);
+      this.refreshIcons();
+    },
+
+    closeCheckoutModal() {
+      if (this.isSubmittingOrder) return;
+      this.showCheckoutModal = false;
+      this.checkAndUnlockScroll();
+    },
+
+    validateCheckoutForm() {
+      this.formErrors = {};
+      if (!this.checkoutForm.name.trim()) {
+        this.formErrors.name = "Full name is required";
+      }
+      const cleanPhone = this.checkoutForm.phone.replace(/[\s-+]/g, "");
+      // Accepts optional 91 prefix, matches 10 digits starting with 6-9
+      const phoneRegex = /^(?:91)?[6-9]\d{9}$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        this.formErrors.phone = "Enter a valid 10-digit Indian mobile number";
+      }
+      if (!this.checkoutForm.address.trim() || this.checkoutForm.address.trim().length < 8) {
+        this.formErrors.address = "Please provide complete street & building address";
+      }
+      return Object.keys(this.formErrors).length === 0;
+    },
+
+    submitOrder() {
+      if (!this.validateCheckoutForm()) {
+        this.showToast("Please correct the form errors", "alert-circle", "error");
+        return;
+      }
+
+      this.isSubmittingOrder = true;
+
+      setTimeout(() => {
+        this.isSubmittingOrder = false;
+
+        const orderId = "ZB-" + Math.floor(100000 + Math.random() * 900000);
+        this.activeOrder = {
+          id: orderId,
+          customer: { ...this.checkoutForm },
+          items: [...this.cart],
+          grandTotalPaise: this.grandTotalPaise,
+          paymentMethod: this.checkoutForm.paymentMethod
+        };
+
+        // Reset cart and coupon
+        this.cart = [];
+        this.showCheckoutModal = false;
+        this.showTrackingModal = true;
+
+        this.launchConfetti();
+        this.startTrackingSimulation();
+        this.refreshIcons();
+      }, 850);
+    },
+
+    startTrackingSimulation() {
+      if (this.trackingTimer) clearInterval(this.trackingTimer);
+      this.trackingStage = 1;
+
+      this.trackingTimer = setInterval(() => {
+        if (this.trackingStage < 4) {
+          this.trackingStage++;
+          if (this.trackingStage === 4) {
+            clearInterval(this.trackingTimer);
+            this.trackingTimer = null;
+            this.showToast("Feast delivered! Have a wonderful meal!", "smile");
+            this.launchConfetti();
+          }
+          this.refreshIcons();
+        }
+      }, 6000);
+    },
+
+    closeTrackingModal() {
+      this.showTrackingModal = false;
+      if (this.trackingTimer) {
+        clearInterval(this.trackingTimer);
+        this.trackingTimer = null;
+      }
+      this.checkAndUnlockScroll();
+    },
+
+    launchConfetti() {
+      if (typeof confetti === 'function') {
+        try {
+          confetti({
+            particleCount: 110,
+            spread: 75,
+            origin: { y: 0.6 }
+          });
+        } catch(e) {
+          // Graceful fallback
+        }
+      }
+    },
+
+    handleImageError(e) {
+      e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
+    },
+
+    showToast(message, icon = "info", type = "info") {
+      const id = Date.now() + Math.random();
+      this.toasts.push({ id, message, icon, type });
+      setTimeout(() => this.dismissToast(id), 3800);
+      this.refreshIcons();
+    },
+
+    dismissToast(id) {
+      this.toasts = this.toasts.filter(t => t.id !== id);
+    },
+
+    setHeroSlide(index) {
+      this.currentSlideIndex = index;
+    },
+
+    initCarousel() {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return; // Disable autoplay if reduced motion preferred
+      }
+      this.carouselTimer = setInterval(() => {
+        if (!this.pauseCarousel) {
+          this.currentSlideIndex = (this.currentSlideIndex + 1) % this.heroSlides.length;
+        }
+      }, 5000);
+    },
+
+    onCarouselMouseEnter() {
+      this.pauseCarousel = true;
+    },
+
+    onCarouselMouseLeave() {
+      this.pauseCarousel = false;
+    },
+
+    lockScroll(lock) {
+      if (lock) {
+        document.body.style.overflow = "hidden";
+      }
+    },
+
+    checkAndUnlockScroll() {
+      if (!this.isCartOpen && !this.showCheckoutModal && !this.showTrackingModal && !this.showLocationModal) {
+        document.body.style.overflow = "";
+      }
+    },
+
+    refreshIcons() {
+      this.$nextTick(() => {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      });
+    }
+  },
+
+  mounted() {
+    this.refreshIcons();
+    this.initCarousel();
+
+    // Escape Key listener
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (this.showCheckoutModal && !this.isSubmittingOrder) this.closeCheckoutModal();
+        if (this.showTrackingModal) this.closeTrackingModal();
+        if (this.isCartOpen) this.closeCartDrawer();
+        if (this.showLocationModal) {
+          this.showLocationModal = false;
+          this.checkAndUnlockScroll();
+        }
+      }
+    });
+
+    // Pause autoplay on tab switch
+    this.visibilityListener = () => {
+      if (document.hidden) {
+        this.pauseCarousel = true;
+      } else {
+        this.pauseCarousel = false;
+      }
+    };
+    document.addEventListener("visibilitychange", this.visibilityListener);
+  },
+
+  beforeUnmount() {
+    if (this.carouselTimer) clearInterval(this.carouselTimer);
+    if (this.trackingTimer) clearInterval(this.trackingTimer);
+    if (this.visibilityListener) document.removeEventListener("visibilitychange", this.visibilityListener);
+    document.body.style.overflow = "";
+  }
+});
+
+app.mount("#app");
+</script>
+
+</body>
+</html>
